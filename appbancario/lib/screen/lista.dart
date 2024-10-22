@@ -18,26 +18,24 @@ class _ListaScreenState extends State<ListaScreen> {
   }
 
   void _carregarTransacoes() async {
-  try {
-    final transacoes = await _api.getAll();
-    print(transacoes);
-    setState(() {
-      _transacoes = transacoes;
-    });
-  } catch (e) {
-    print(e);
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('Erro ao carregar transações'),
-    ));
+    try {
+      final transacoes = await _api.getAllTransacoes();
+      setState(() {
+        _transacoes = transacoes;
+      });
+    } catch (e) {
+      print(e);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Erro ao carregar transações'),
+      ));
+    }
   }
-}
-
 
   void _adicionarTransacao(Transacao novaTransacao) async {
     try {
-      final transacaoCriada = await _api.create(novaTransacao);
+      await _api.createTransacao(novaTransacao);
       setState(() {
-        _transacoes.add(transacaoCriada);
+        _transacoes.add(novaTransacao);
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -48,7 +46,7 @@ class _ListaScreenState extends State<ListaScreen> {
 
   void _editarTransacao(int index, Transacao transacaoEditada) async {
     try {
-      await _api.update(transacaoEditada.id, transacaoEditada);
+      await _api.updateTransacao(transacaoEditada.id, transacaoEditada);
       setState(() {
         _transacoes[index] = transacaoEditada;
       });
@@ -61,7 +59,7 @@ class _ListaScreenState extends State<ListaScreen> {
 
   void _excluirTransacao(int index) async {
     try {
-      await _api.delete(_transacoes[index].id);
+      await _api.deleteTransacao(_transacoes[index].id);
       setState(() {
         _transacoes.removeAt(index);
       });
@@ -144,11 +142,13 @@ class _ListaScreenState extends State<ListaScreen> {
                         ),
                       );
                       if (transacaoEditada != null) {
-                        _editarTransacao(index, Transacao(
-                          id: _transacoes[index].id,
-                          nome: transacaoEditada['nome'],
-                          valor: double.parse(transacaoEditada['valor']),
-                        ));
+                        _editarTransacao(
+                            index,
+                            Transacao(
+                              id: _transacoes[index].id,
+                              nome: transacaoEditada['nome'],
+                              valor: double.parse(transacaoEditada['valor']),
+                            ));
                       }
                       return false;
                     }
@@ -156,7 +156,8 @@ class _ListaScreenState extends State<ListaScreen> {
                   },
                   child: ListTile(
                     title: Text(_transacoes[index].nome),
-                    subtitle: Text('Valor: R\$ ${_transacoes[index].valor.toStringAsFixed(2)}'),
+                    subtitle: Text(
+                        'Valor: R\$ ${_transacoes[index].valor.toStringAsFixed(2)}'),
                   ),
                 );
               },

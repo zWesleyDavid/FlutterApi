@@ -9,9 +9,9 @@ class Transacao {
 
   factory Transacao.fromJson(Map<String, dynamic> json) {
     return Transacao(
-      id: json['id'],
+      id: int.parse(json['id'].toString()),
       nome: json['nome'],
-      valor: json['valor'],
+      valor: json['valor'].toDouble(),
     );
   }
 
@@ -24,16 +24,25 @@ class Transacao {
   }
 }
 
-class TransacaoApi extends AbstractApi<Transacao> {
-  TransacaoApi() : super('transacoes');
-
-  @override
-  Transacao fromJson(Map<String, dynamic> json) {
-    return Transacao.fromJson(json);
+class TransacaoApi extends AbstractApi {
+  // Método para converter JSON em uma lista de transações
+  Future<List<Transacao>> getAllTransacoes() async {
+    final List<dynamic> jsonList = await getAll();
+    return jsonList.map((json) => Transacao.fromJson(json)).toList();
   }
 
-  @override
-  Map<String, dynamic> toJson(Transacao item) {
-    return item.toJson();
+  // Método para criar uma transação
+  Future<void> createTransacao(Transacao transacao) async {
+    await create(transacao.toJson());
+  }
+
+  // Método para atualizar uma transação
+  Future<void> updateTransacao(int id, Transacao transacao) async {
+    await update(id, transacao.toJson());
+  }
+
+  // Método para deletar uma transação
+  Future<void> deleteTransacao(int id) async {
+    await delete(id);
   }
 }

@@ -1,44 +1,36 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-abstract class AbstractApi<T> {
+abstract class AbstractApi {
   final _urlLocalHost = 'http://localhost:3000';
 
-  String _recurso;
-
-  AbstractApi(this._recurso);
-
-  Future<List<T>> getAll() async {
-    var response = await http.get(Uri.parse('$_urlLocalHost/$_recurso'));
+  Future<List<dynamic>> getAll() async {
+    final response = await http.get(Uri.parse('$_urlLocalHost/transacoes'));
 
     if (response.statusCode == 200) {
-      return (json.decode(response.body) as List)
-          .map((data) => fromJson(data))
-          .toList();
+      return json.decode(response.body);
     } else {
       throw Exception('Erro ao carregar dados');
     }
   }
 
-  Future<T> create(T item) async {
-    var response = await http.post(
-      Uri.parse('$_urlLocalHost/$_recurso'),
+  Future<void> create(Map<String, dynamic> item) async {
+    final response = await http.post(
+      Uri.parse('$_urlLocalHost/transacoes'),
       headers: {"Content-Type": "application/json"},
-      body: json.encode(toJson(item)),
+      body: json.encode(item),
     );
 
-    if (response.statusCode == 201) {
-      return fromJson(json.decode(response.body));
-    } else {
+    if (response.statusCode != 201) {
       throw Exception('Erro ao criar item');
     }
   }
 
-  Future<void> update(int id, T item) async {
-    var response = await http.put(
-      Uri.parse('$_urlLocalHost/$_recurso/$id'),
+  Future<void> update(int id, Map<String, dynamic> item) async {
+    final response = await http.put(
+      Uri.parse('$_urlLocalHost/transacoes/$id'),
       headers: {"Content-Type": "application/json"},
-      body: json.encode(toJson(item)),
+      body: json.encode(item),
     );
 
     if (response.statusCode != 200) {
@@ -47,13 +39,10 @@ abstract class AbstractApi<T> {
   }
 
   Future<void> delete(int id) async {
-    var response = await http.delete(Uri.parse('$_urlLocalHost/$_recurso/$id'));
+    final response = await http.delete(Uri.parse('$_urlLocalHost/transacoes/$id'));
 
     if (response.statusCode != 200) {
       throw Exception('Erro ao excluir item');
     }
   }
-
-  T fromJson(Map<String, dynamic> json);
-  Map<String, dynamic> toJson(T item);
 }
